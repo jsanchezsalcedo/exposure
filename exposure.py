@@ -5,6 +5,7 @@ from pymel.core import *
 
 mainWindow = None
 __title__ = 'Exposure'
+__version__ = '2.0'
 
 lightTypes = [
     'aiAreaLight',
@@ -24,10 +25,10 @@ def getMainWindow():
     mainWindow = shiboken.wrapInstance(long(ptr), QtWidgets.QMainWindow)
     return mainWindow
 
-class plusMinExp(QtWidgets.QDialog):
+class exposure(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        super(plusMinExp, self).__init__(parent)
-        self.setWindowTitle('{}'.format(__title__))
+        super(exposure, self).__init__(parent)
+        self.setWindowTitle('{} {}'.format(__title__, __version__))
         self.setWindowFlags(QtCore.Qt.Tool)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFixedWidth(225)
@@ -62,10 +63,10 @@ class plusMinExp(QtWidgets.QDialog):
         
         self.setLayout(self.mainLayout)
 
-        applyBtn.clicked.connect(self.setExposure)
+        applyBtn.clicked.connect(self.setVal)
         cancelBtn.clicked.connect(self.cancel)
 
-    def setExposure(self):
+    def setVal(self):
         plusValue = float(self.plusExpLe.text())
         minValue = float(self.minExpLe.text())
 
@@ -73,14 +74,14 @@ class plusMinExp(QtWidgets.QDialog):
             exposure = float(light.aiExposure.get())
             plusExposure = exposure + plusValue
             minExposure = exposure - minValue
+
             if plusExposure > exposure:
                 light.aiExposure.set(plusExposure)
                 self.plusExpLe.setText(unicode(plusValue))
-                print plusExposure
+
             elif minExposure < exposure:
                 light.aiExposure.set(minExposure)
                 self.minExpLe.setText(unicode(minValue))
-                print minExposure
             else:
                 print 'There is not new exposure value added for', light.getParent()
 
@@ -91,7 +92,7 @@ def run():
     global mainWindow
 
     if not mainWindow or not cmds.window(mainWindow, q=True, e=True):
-        mainWindow = plusMinExp(parent=getMainWindow())
+        mainWindow = exposure(parent=getMainWindow())
 
     mainWindow.show()
     mainWindow.raise_()
