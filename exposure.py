@@ -1,11 +1,16 @@
-from PySide2 import QtCore, QtWidgets
+import maya.cmds as cmds
 from maya import OpenMayaUI as omui
+
+from PySide2 import QtCore, QtWidgets
 import shiboken2 as shiboken
-from pymel.core import *
 
 mainWindow = None
 __title__ = 'Exposure'
-__version__ = '2.0'
+__version__ = 'v2.1.0'
+
+print ' '
+print ' > You have openned {} {} successfully.'.format(__title__,__version__)
+print ' '
 
 lightTypes = [
     'aiAreaLight',
@@ -70,20 +75,23 @@ class exposure(QtWidgets.QDialog):
         plusValue = float(self.plusExpLe.text())
         minValue = float(self.minExpLe.text())
 
-        for light in ls(sl=True, dag=True, typ=lightTypes):
-            exposure = float(light.aiExposure.get())
+        for light in cmds.ls(sl=True, dag=True, typ=lightTypes):
+            exposure = float(cmds.getAttr(light + '.aiExposure'))
             plusExposure = exposure + plusValue
             minExposure = exposure - minValue
 
             if plusExposure > exposure:
-                light.aiExposure.set(plusExposure)
+                cmds.setAttr(light + '.aiExposure', plusExposure)
                 self.plusExpLe.setText(unicode(plusValue))
+                self.close()
 
             elif minExposure < exposure:
-                light.aiExposure.set(minExposure)
+                cmds.setAttr(light + '.aiExposure', minExposure)
                 self.minExpLe.setText(unicode(minValue))
+                self.close()
             else:
                 print 'There is not new exposure value added for', light.getParent()
+
 
     def cancel(self):
         self.close()
